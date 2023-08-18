@@ -24,6 +24,7 @@ interface TableType {
   type: any
   extension: string
   checked?: boolean
+  items?: TableType[]
 }
 
 interface BreadcrumbType {
@@ -43,11 +44,13 @@ const tableData = ref<TableType[]>([])
  * 请求处理文件列表
  */
 const requestFiles = (url: string) => {
-  const { data } = useFetch<{ items: TableType[] }>(url)
+  const { data } = useFetch<TableType>(url)
   watch(data, (newData) => {
     if (newData) {
-      const { items } = newData
-      tableData.value = items
+      const { items, isFolder } = newData
+      if (isFolder && items?.length) {
+        tableData.value = items
+      }
     }
   })
 }
