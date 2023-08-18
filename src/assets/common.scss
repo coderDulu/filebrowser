@@ -1,0 +1,176 @@
+.card {
+  background-color: #ffffff;
+  box-shadow: 2px 1px 40px 0px rgba(136, 136, 136, 0.35);
+  border-radius: 12px;
+  padding: 30px 20px;
+
+  &:hover {
+    box-shadow: 1px 5px 10px 3px rgba(#353333, 0.5);
+    transition: box-shadow 500ms ease-in-out;
+  }
+}
+
+.result {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+}
+
+@font-face {
+  font-family: 'SourceHanSansCN-Bold';
+  src: url('./woff2/KaiGenGothicSC-Bold.woff');
+
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SourceHanSansCN-Normal';
+  src: url('./woff2/KaiGenGothicSC-Regular.woff');
+
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'SourceHanSansCN-Medium';
+  src: url('./woff2/KaiGenGothicSC-Medium.woff');
+
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'DIN-Medium';
+  src: url('./woff2/din-medium-webfont.woff');
+
+  font-weight: normal;
+  font-style: normal;
+}
+
+$color: #cd0000;
+$scale: 0.83;
+
+@function vw($value, $base: 1920) {
+  @return calc($value / $base) * 100vw;
+  // @return #{clamp(#{$value * $scale}px, #{calc($value / $base) * 100}vw, 2560px)};
+}
+
+@function vh($value, $base: 1080) {
+  @return calc($value / $base) * 100vh;
+  // @return #{clamp(#{$value * $scale}px, #{calc($value / $base) * 100}vh, 1230px)};
+}
+
+@mixin setSize($width, $height, $minWidth: 'width', $minHeight: 'height') {
+  @if $width != 'none' {
+    width: vw($width);
+  }
+
+  @if $height != 'none' {
+    height: vh($height);
+  }
+
+  @if $minWidth == 'width' and $width != 'none' {
+    min-width: calc($width) + px;
+  } @else {
+    min-width: $minWidth;
+  }
+
+  @if $minHeight == 'height' and $height != 'none' {
+    min-height: calc($height * $scale) + px;
+  } @else {
+    min-height: $minHeight;
+  }
+}
+
+@mixin setIconSize($value: 24) {
+  width: vw($value);
+  height: vw($value);
+  min-width: $value + px;
+  min-height: $value + px;
+}
+
+@mixin setFontSize($value: 16) {
+  $size: $value + px;
+
+  font-size: calc(max($size, vw($value)));
+}
+
+$fontSize_16: setFontSize();
+$fontSize_18: setFontSize(18);
+$fontSize_20: setFontSize(20);
+$fontSize_30: setFontSize(30);
+
+// antd公共样式
+
+// 表单
+:deep(.ant-form-item-label) {
+  line-height: max(36px, vh(36));
+}
+
+:deep(.ant-form-item-label > label) {
+  color: #555555;
+  @include setFontSize();
+  font-family: 'SourceHanSansCN-Normal';
+}
+
+:deep(.ant-form-item-control) {
+  // line-height: max(30px, vh(30));
+}
+
+:deep(.ant-form-item-control-input-content > .ant-input),
+:deep(.ant-input-password),
+:deep(.ant-form-item-control-input-content > .ant-select),
+:deep(.ant-input-number) {
+  @include setSize(400, 40);
+  // width: vw(400);
+  // height: vh(36);
+  border-radius: 4px;
+  // border: 1px solid #cfcfcf;
+  font-family: 'SourceHanSansCN-Normal';
+}
+:deep(.ant-input-number-input-wrap),
+:deep(.ant-input-number-input),
+:deep(.ant-form-item-control-input) {
+  height: 100%;
+}
+
+:deep(.ant-select-selector) {
+  height: 100% !important;
+  display: flex;
+  align-items: center;
+}
+
+:deep(.ant-switch-checked) {
+  background-color: $color;
+}
+
+:deep(.ant-radio-checked .ant-radio-inner) {
+  // background-color: $color;
+  border-color: $color;
+
+  &::after {
+    background-color: $color;
+  }
+}
+
+// 表格单元格
+:deep(.ant-table-cell) {
+  color: #555555;
+  @include setFontSize();
+
+  div {
+    color: #555555;
+    @include setFontSize();
+  }
+}
+
+:deep(.ant-progress-text) {
+  color: #ffffff !important;
+}
+
+// :deep(.ant-select-arrow) {
+//   top: 35%;
+// }

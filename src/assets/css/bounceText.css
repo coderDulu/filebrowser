@@ -1,0 +1,16 @@
+.bounce-text {
+    /* display: flex;
+    gap: 3px; */
+}
+
+
+.bounce-text span {
+    display: inline-block;
+    animation: bounce .5s ease infinite alternate;
+}
+
+@keyframes bounce {
+    100% {
+        transform: translateY(5px)
+    }
+}
