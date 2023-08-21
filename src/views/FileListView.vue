@@ -1,13 +1,13 @@
 <script setup lang="tsx">
+import IconsItem from '@/components/IconsItem.vue'
+import { useFetch } from '@/hooks/useFetch'
+import useIcons from '@/hooks/useIcons'
 import { ref, unref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { useFetch } from '@/hooks/useFetch'
-import IconsItem from '@/components/IconsItem.vue'
-import useIcons from '@/hooks/useIcons'
 // import { ElTableV2 } from 'element-plus'
 
-import type { FunctionalComponent } from 'vue'
 import { ElCheckbox, type CheckboxValueType } from 'element-plus'
+import type { FunctionalComponent } from 'vue'
 
 type SelectionCellProps = {
   value: boolean
@@ -90,6 +90,21 @@ watchEffect(() => {
   }
 })
 
+/**
+ * 名称排序
+ */
+const hasSort = ref(true)
+const onSort = () => {
+  hasSort.value = !hasSort.value
+
+  if(hasSort.value) {
+    tableData.value.sort((a, b) => a.name.localeCompare(b.name))
+  } else {
+    tableData.value.sort((a, b) => b.name.localeCompare(a.name))
+  }
+} 
+
+
 const columns: any[] = [
   {
     dataKey: 'name',
@@ -98,25 +113,30 @@ const columns: any[] = [
     minWidth: 500,
     cellRenderer: ({ rowData }: { rowData: TableType }) => {
       return (
-        <>
-          <div
-            onDblclick={() => {
-              console.log('dbclick')
-            }}
-            class="el-table-column-folder"
-          >
-            <IconsItem iconName={rowData.isFolder ? 'Folder' : 'Document'} />
-            {rowData.name}
-          </div>
-        </>
+        <div class="el-table-column-folder">
+          <IconsItem iconName={rowData.isFolder ? 'Folder' : 'Document'} />
+          {rowData.name}
+        </div>
       )
+    },
+    headerCellRenderer: (props: any) => {
+      if (props.column.key === 'name') {
+        return (
+          // 名称排序
+          <div onClick={onSort} style={{display: 'flex', alignItems: 'center', 'cursor': 'pointer'}}>
+            {props.column.title}
+            {hasSort.value ? <IconsItem iconName="CaretBottom" /> : <IconsItem iconName="CaretTop" />}
+          </div>
+        )
+      }
+      return <>{props.column.title}</>
     }
   },
   {
     dataKey: 'size',
     key: 'size',
-    title: '大小',
-    minWidth: 500
+    title: '大小（字节）',
+    minWidth: 500,
   },
   {
     dataKey: 'modified',
@@ -176,6 +196,9 @@ const dblclick = (e: any) => {
     router.push(rootRoutePath + path)
   }
 }
+
+
+
 </script>
 
 <template>
