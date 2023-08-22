@@ -4,6 +4,7 @@ import { useFetch } from '@/hooks/useFetch'
 import useIcons from '@/hooks/useIcons'
 import { ref, unref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import apis from '@/request/apis/index'
 // import { ElTableV2 } from 'element-plus'
 
 import { ElCheckbox, type CheckboxValueType } from 'element-plus'
@@ -43,22 +44,29 @@ const tableData = ref<TableType[]>([])
 /**
  * 请求处理文件列表
  */
-const requestFiles = (url: string) => {
-  const { data } = useFetch<TableType>(url)
-  watch(data, (newData) => {
-    if (newData) {
-      const { items, isFolder } = newData
-      if (isFolder && items?.length) {
-        tableData.value = items
-      }
-    }
-  })
-}
+// const requestFiles = (url: string) => {
+//   const { data } = useFetch<TableType>(url)
+//   watch(data, (newData) => {
+//     if (newData) {
+//       const { items, isFolder } = newData
+//       console.log(items);
+//       if (isFolder && items?.length) {
+//         tableData.value = items
+//       }
+//     }
+//   })
+// }
 /**
  * 路由变化，发送请求
  */
 watchEffect(() => {
-  requestFiles(`/api/${route.fullPath}`)
+  // requestFiles(`/api/${route.fullPath}`)
+  apis.getFiles<TableType>(route.fullPath).then((res) => {
+    const { items, isFolder } = res
+    if(items && isFolder) {
+      tableData.value = items
+    }
+  })
 })
 
 /**
@@ -97,13 +105,12 @@ const hasSort = ref(true)
 const onSort = () => {
   hasSort.value = !hasSort.value
 
-  if(hasSort.value) {
+  if (hasSort.value) {
     tableData.value.sort((a, b) => a.name.localeCompare(b.name))
   } else {
     tableData.value.sort((a, b) => b.name.localeCompare(a.name))
   }
-} 
-
+}
 
 const columns: any[] = [
   {
@@ -123,9 +130,16 @@ const columns: any[] = [
       if (props.column.key === 'name') {
         return (
           // 名称排序
-          <div onClick={onSort} style={{display: 'flex', alignItems: 'center', 'cursor': 'pointer'}}>
+          <div
+            onClick={onSort}
+            style={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
+          >
             {props.column.title}
-            {hasSort.value ? <IconsItem iconName="CaretBottom" /> : <IconsItem iconName="CaretTop" />}
+            {hasSort.value ? (
+              <IconsItem iconName="CaretBottom" />
+            ) : (
+              <IconsItem iconName="CaretTop" />
+            )}
           </div>
         )
       }
@@ -136,7 +150,7 @@ const columns: any[] = [
     dataKey: 'size',
     key: 'size',
     title: '大小（字节）',
-    minWidth: 500,
+    minWidth: 500
   },
   {
     dataKey: 'modified',
@@ -196,9 +210,6 @@ const dblclick = (e: any) => {
     router.push(rootRoutePath + path)
   }
 }
-
-
-
 </script>
 
 <template>

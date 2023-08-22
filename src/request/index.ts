@@ -1,10 +1,10 @@
-import axios from 'axios';
-import type { AxiosRequestConfig, AxiosInstance } from 'axios'
 import WebSocketClient from '@/request/ws';
+import type { AxiosInstance, AxiosRequestConfig } from 'axios';
+import axios from 'axios';
 
 interface IResponseData<T = any> {
-  result: string;
-  value?: T;
+  status: number;
+  data?: T;
   message: string;
 }
 
@@ -38,8 +38,8 @@ class Request {
         // 业务逻辑处理
         const resData: IResponseData = response.data;
 
-        if (resData.result === "00") {
-          const data = resData.value ?? resData
+        if (resData.status === 200) {
+          const data = resData.data ?? resData
           return Promise.resolve(data);
         } else {
           return Promise.reject(new Error(resData.message ?? 'error'));
