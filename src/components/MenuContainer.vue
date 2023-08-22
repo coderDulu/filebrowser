@@ -1,16 +1,19 @@
 <script lang="ts" setup>
 import { ref } from 'vue'
 import type { MenusType } from '@/components/common/menu/MenuList.vue'
-import { ElMessage, ElIcon } from 'element-plus'
+import { ElIcon } from 'element-plus'
 import { CaretLeft, CaretRight } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 
 import MenuCpm from './common/menu/MenuCpm.vue'
+
+const router = useRouter()
 
 const menus = ref<MenusType[]>([
   {
     label: '新建文件夹',
     icon: 'Folder',
-    index: '1',
+    index: '1'
   },
   {
     label: '新建文件',
@@ -21,10 +24,21 @@ const menus = ref<MenusType[]>([
     label: '设置',
     icon: 'Setting',
     index: '3'
+  },
+  {
+    label: '退出登录',
+    icon: 'CircleClose',
+    onClick() {
+      router.push('/login')
+      // 清空token
+      localStorage.removeItem('token')
+    }
   }
 ])
 
 const isCollapse = ref(false)
+
+const onSelect = () => {}
 </script>
 <template>
   <div class="main-left" v-scroll>
@@ -34,10 +48,9 @@ const isCollapse = ref(false)
       :menus="menus"
       background-color="#fafafa"
       text-color="#546e7a"
-      @select="
-        (index, _, item, routerResult) => ElMessage({ message: '点击了' + index, type: 'success' })
-      "
+      @select="onSelect"
     >
+      <!-- 显示隐藏按钮 -->
       <template #collapse>
         <div @click="() => (isCollapse = !isCollapse)" class="collapse">
           <el-icon size="24" v-if="isCollapse"><CaretRight /></el-icon>

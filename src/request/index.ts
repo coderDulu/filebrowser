@@ -22,7 +22,12 @@ class Request {
     this.instance.interceptors.request.use(
       (config) => {
         if (!config.headers['Content-Type']) {
-          // config.headers['Content-Type'] = config.headers['Content-Type']
+          const token = localStorage.getItem('token')
+          // 设置token
+          if(token) {
+            config.headers['Authorization'] = 'Bearer ' + token
+          }
+          // 设置默认请求格式
           config.headers['Content-Type'] = 'application/json'
         }
 
@@ -46,16 +51,10 @@ class Request {
         } 
       },
       (error) => {
-        const { response: { status } } = error
-        switch (status) {
-          case 404:
-            console.error(new Error('请求不存在'));
-            break;
-          case 500:
-            console.error(new Error("服务器错误"));
-            break;
-          default:
-            console.error(new Error("请求错误"))
+        const { response: { data: message } } = error
+        
+        if(message) {
+          error.message = message
         }
         // 处理响应错误，例如服务端错误等
         return Promise.reject(error);

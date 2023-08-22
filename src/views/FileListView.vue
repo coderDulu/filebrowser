@@ -4,10 +4,9 @@ import { useFetch } from '@/hooks/useFetch'
 import useIcons from '@/hooks/useIcons'
 import { ref, unref, watch, watchEffect } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import apis from '@/request/apis/index'
-// import { ElTableV2 } from 'element-plus'
+import { getFiles } from '@/request/apis/index'
 
-import { ElCheckbox, type CheckboxValueType } from 'element-plus'
+import { ElCheckbox, type CheckboxValueType, ElMessage } from 'element-plus'
 import type { FunctionalComponent } from 'vue'
 
 type SelectionCellProps = {
@@ -26,6 +25,7 @@ interface TableType {
   extension: string
   checked?: boolean
   items?: TableType[]
+  content?: string
 }
 
 interface BreadcrumbType {
@@ -36,37 +36,37 @@ interface BreadcrumbType {
 
 const route = useRoute()
 const router = useRouter()
-const rootRoutePath = '/files'
+const rootRoutePath = '/home/files'
 
 // 文件列表
 const tableData = ref<TableType[]>([])
 
 /**
- * 请求处理文件列表
- */
-// const requestFiles = (url: string) => {
-//   const { data } = useFetch<TableType>(url)
-//   watch(data, (newData) => {
-//     if (newData) {
-//       const { items, isFolder } = newData
-//       console.log(items);
-//       if (isFolder && items?.length) {
-//         tableData.value = items
-//       }
-//     }
-//   })
-// }
-/**
  * 路由变化，发送请求
  */
 watchEffect(() => {
-  // requestFiles(`/api/${route.fullPath}`)
-  apis.getFiles<TableType>(route.fullPath).then((res) => {
-    const { items, isFolder } = res
-    if(items && isFolder) {
-      tableData.value = items
-    }
-  })
+  const {
+    params: { path }
+  } = route
+
+  let requestPath = '/files'
+  if (Array.isArray(path)) {
+    requestPath += path.join('/')
+  }
+
+  getFiles<TableType>(requestPath)
+    .then((res) => {
+      const { items, isFolder, content } = res
+      if (items && isFolder) {
+        tableData.value = items
+      } else {
+        console.log(content)
+      }
+    })
+    .catch((err: Error) => {
+      ElMessage.error(err.message)
+      router.push('/login')
+    })
 })
 
 /**
@@ -78,7 +78,7 @@ const breadcrumbList = ref<BreadcrumbType[]>([])
  * 路由切换面包屑更改
  */
 watchEffect(() => {
-  const path = route.params?.path
+  const { path } = route.params
 
   breadcrumbList.value = [
     {
@@ -88,7 +88,7 @@ watchEffect(() => {
     }
   ]
 
-  if (path.length && path instanceof Array) {
+  if (Array.isArray(path)) {
     const morePath: BreadcrumbType[] = path.map((p, index) => ({
       label: p,
       path: `${rootRoutePath}/${path.slice(0, index + 1).join('/')}`
@@ -117,7 +117,7 @@ const columns: any[] = [
     dataKey: 'name',
     key: 'name',
     title: '名称',
-    minWidth: 500,
+    minWidth: "33%",
     cellRenderer: ({ rowData }: { rowData: TableType }) => {
       return (
         <div class="el-table-column-folder">
@@ -150,7 +150,7 @@ const columns: any[] = [
     dataKey: 'size',
     key: 'size',
     title: '大小（字节）',
-    minWidth: 500
+    minWidth: "33%"
   },
   {
     dataKey: 'modified',
@@ -201,14 +201,21 @@ columns.unshift({
 const dblclick = (e: any) => {
   const target = e.target // 当前cell元素
   const rowTarget = target.parentNode // 当前row元素
-  const parentTarget = rowTarget.parentNode as HTMLDivElement
-  const childrenNodes = Array.from(parentTarget.children)
-  const findIndex = childrenNodes.findIndex((item) => item === rowTarget)
+  // 找到对应的名称
+  const text = rowTarget.children[1].innerText
+  tableData.value.some((item) => {
+    const { name, path } = item
+    if (name === text) {
+      router.push({
+        name: 'files',
+        params: {
+          path: path.split('/').filter(Boolean)
+        }
+      })
 
-  if (findIndex !== -1) {
-    const { path } = tableData.value[findIndex]
-    router.push(rootRoutePath + path)
-  }
+      return
+    }
+  })
 }
 </script>
 
@@ -218,9 +225,12 @@ const dblclick = (e: any) => {
     <el-breadcrumb :separator-icon="useIcons('ArrowRight')">
       <el-breadcrumb-item v-for="item in breadcrumbList" :key="item.path" :to="{ path: item.path }">
         <icons-item style="cursor: pointer" size="24" v-if="item.icon" :icon-name="item.icon" />
-        <span v-else>{{ item.label }}</span>
+        <span v-else
+          ><h4 style="font-weight: bold">{{ item.label }}</h4></span
+        >
       </el-breadcrumb-item>
     </el-breadcrumb>
+    <!-- 文件夹列表 -->
     <el-auto-resizer>
       <template #default="{ height, width }">
         <el-table-v2
@@ -233,27 +243,6 @@ const dblclick = (e: any) => {
         </el-table-v2>
       </template>
     </el-auto-resizer>
-
-    <!-- <el-table
-      lazy
-      @row-dblclick="rowDbClick"
-      show-overflow-tooltip
-      highlight-current-row
-      :data="tableData"
-      style="width: 100%"
-    >
-      <el-table-column type="selection" width="55" />
-      <el-table-column prop="name" label="名称">
-        <template #default="{ row }">
-          <div class="el-table-column-folder">
-            <icons-item :icon-name="row.isFolder ? 'Folder' : 'Document'" />
-            {{ row.name }}
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column prop="size" label="大小" />
-      <el-table-column prop="modified" label="最后修改时间" />
-    </el-table> -->
   </div>
 </template>
 

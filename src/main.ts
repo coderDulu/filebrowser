@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 import myPlugin from './plugin'
 import './assets/base.css'
 import 'element-plus/dist/index.css'
+import 'animate.css'
 
 
 import App from './App.vue'
