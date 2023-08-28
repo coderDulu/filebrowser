@@ -1,8 +1,11 @@
-import type { } from '../types/global'
+import db from "../db";
+const { userDB } = db;
 
-function logion(ctx: CtxType, next: NextType) {
+
+function login(ctx: CtxType, next: NextType) {
   const test_username = "dudulu";
   const test_password = "dudulu233";
+
 
   const { username, password } = ctx.request.body as UserType;
   // 用户验证通过
@@ -11,12 +14,13 @@ function logion(ctx: CtxType, next: NextType) {
   } else {
     ctx.status = 401;
     ctx.body = {
-      status: 401,
+      code: 401,
+      status: "success",
       message: "用户名或密码错误",
     };
   }
 }
 
 export default {
-    logion
-}
+  login,
+};

@@ -8,8 +8,9 @@ class CreateDB {
   constructor(path: string) {
     // 创建数据库连接
     this._db = new sqlite3.Database(path);
-    this._db.addListener("connection", () => {
-      console.log("database connection");
+
+    this._db.on("close", () => {
+      console.log("Database closed");
     });
   }
 
@@ -29,7 +30,7 @@ class CreateDB {
 
   // 关闭数据库连接
   close() {
-    this.db.close();
+    this._db.close();
   }
 
   /**

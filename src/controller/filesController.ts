@@ -1,5 +1,6 @@
 import path from "path";
 import FileSystem from "../utils/fileSystem";
+// import type { SuccessRepType } from '../../types/index'
 
 import type { ParameterizedContext } from "koa";
 
@@ -12,20 +13,25 @@ const filesController = async (ctx: ParameterizedContext) => {
 
     const readPath = path.join(rootPath, matchPath);
     // 获取路径信息
-    const result = await fileSystem.read(readPath);
+    const data = await fileSystem.read(readPath);
 
     // 响应
     ctx.status = 200;
-    // ctx.body = result
-    ctx.body = {
-      status: 200,
-      message: "success",
-      data: result,
+
+    const response: SuccessRepType = {
+      status: "success",
+      code: 200,
+      message: "get info success",
+      data,
     };
+
+    ctx.body = response;
   } catch (error) {
     ctx.status = 404;
-    ctx.body = {
-      status: 404,
+
+    (ctx.body as ErrorRepType) = {
+      status: "error",
+      code: 404,
       message: error.message || "路径读取失败",
       error,
     };

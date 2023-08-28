@@ -11,7 +11,7 @@ interface InfoType {
   type: string | false;
   isFolder: boolean;
   items?: InfoType[];
-  childNumber?: number;
+  subFileNumber?: number;
 }
 
 const fileType = {
@@ -68,8 +68,8 @@ class FileSystem {
             // 文件夹信息
             const info: InfoType = {
               ...folderInfo,
+              subFileNumber: files.length,
               items: itemInfos,
-              // childNumber: files.length,
             };
             resolve(info);
           } catch (error) {
@@ -111,20 +111,16 @@ class FileSystem {
           size,
           extension,
           modified,
-          type: mimeType,
+          type: isFolder ? "" : mimeType || "",
           isFolder,
         };
-        if (isFolder) {
-          const children = fs.readdirSync(filepath);
-          info.childNumber = children.length;
-        }
 
         return info;
       } else {
         return Promise.reject(new Error("not found path"));
       }
     } catch (error) {
-      return Promise.reject(new Error("get info error"));
+      return Promise.reject(error);
     }
   }
 
@@ -175,6 +171,28 @@ class FileSystem {
       return fileType.Error;
     }
   }
+}
+
+/**
+ * 判断文件是文本文件还是二进制文件
+ * @param filePath 文件路径
+ * @param bufferSize 读取的字节数
+ * @param encoding 编码格式
+ * @returns
+ */
+export function isTextFile(
+  filePath: string,
+  bufferSize = 5,
+  encoding: BufferEncoding = "utf-8"
+) {
+  const buffer = Buffer.alloc(bufferSize);
+  const fd = fs.openSync(filePath, "r");
+  fs.readSync(fd, buffer, 0, bufferSize, 0);
+  fs.closeSync(fd);
+
+  const content = buffer.toString(encoding);
+
+  return /^[a-zA-Z0-9\s\-_.,:;"'?!@#$%^&*()\[\]{}<>\|\\/~`+=]*$/.test(content);
 }
 
 export default FileSystem;

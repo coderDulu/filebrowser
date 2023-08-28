@@ -2,7 +2,6 @@ import CreateDB from "../utils/CreateDB";
 import type { RunResult } from "sqlite3";
 
 class UserDB extends CreateDB {
-
   constructor(path: string) {
     super(path);
     this._createUserTable();
@@ -55,6 +54,21 @@ class UserDB extends CreateDB {
   updateUserPassword(username: string, password: string) {
     const sql = `UPDATE users SET username = ?, password = ?`;
     return this.run(sql, [username, password]);
+  }
+
+  
+  /**
+   * 查询用户
+   * @param username 用户名
+   * @returns 
+   */
+  getUser(username?: string) {
+    let sql = `SELECT * FROM users `;
+    if (username) {
+      sql += `WHERE username = ?`;
+    }
+
+    return this.run(sql, username)
   }
 }
 

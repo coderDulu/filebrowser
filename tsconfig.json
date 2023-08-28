@@ -3,13 +3,17 @@
         "target": "ES6",
         "module": "commonjs",
         "outDir": "./dist",
-        "esModuleInterop": true
+        "esModuleInterop": true,
+        "typeRoots": ["./types"]
     },
     "include": [
         "src/**/*.ts",
-        "src/**/*.d.ts"
+        "./types/index.d.ts"
     ],
     "exclude": [
         "node_modules"
-    ]
+    ],
+    "ts-node": {
+        "files": true
+    }
 }

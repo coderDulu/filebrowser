@@ -3,8 +3,6 @@ import Router = require("koa-router");
 import bodyParser from "koa-bodyparser";
 import logger from "koa-logger";
 
-// import db from "./db";
-// const { userDB } = db;
 
 import filesController from "./controller/filesController";
 import jwtUtils from "./utils/jwt";
@@ -18,13 +16,12 @@ const PORT = 5100;
 app.use(logger());
 app.use(bodyParser());
 
-router.get("", (ctx) => {});
 
 // 文件列表
 router.get("/api/files:matchPath(.*)",jwtUtils.authenticateJWT, filesController);
 
 // 登录
-router.post("/api/login", userController.logion, jwtUtils.getToken);
+router.post("/api/login", userController.login, jwtUtils.getToken);
 
 app.use(router.routes()).use(router.allowedMethods());
 
